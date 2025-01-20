@@ -18,13 +18,25 @@ public class ConcurrentBank {
         return bankAccount;
     }
 
-    public synchronized void transfer(BankAccount accountSender, BankAccount accountRecipient, BigDecimal amountMoney) {
-        accountSender.withdraw(amountMoney);
-        try {
-            accountRecipient.deposit(amountMoney);
-        }catch (Exception e){
-            accountSender.deposit(amountMoney);
-            throw new RuntimeException("operation error");
+    public void transfer(BankAccount accountSender, BankAccount accountRecipient, BigDecimal amountMoney) {
+        BankAccount firstLock = accountSender;
+        BankAccount secondLock = accountRecipient;
+
+        if (accountSender.getAccountNumber() > accountRecipient.getAccountNumber()) {
+            firstLock = accountRecipient;
+            secondLock = accountSender;
+        }
+
+        synchronized (firstLock) {
+            synchronized (secondLock) {
+                accountSender.withdraw(amountMoney);
+                try {
+                    accountRecipient.deposit(amountMoney);
+                } catch (Exception e) {
+                    accountSender.deposit(amountMoney);
+                    throw new RuntimeException("operation error");
+                }
+            }
         }
     }
 

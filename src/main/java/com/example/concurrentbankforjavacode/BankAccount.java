@@ -31,11 +31,4 @@ class BankAccount {
         return balance;
 
     }
-
-
-
-
-
-
-
 }
